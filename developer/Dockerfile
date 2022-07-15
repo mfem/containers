@@ -39,7 +39,7 @@ WORKDIR /home/euler
 
 # MFEM repo checkout
 RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
-ADD --chown=euler:euler user.mk mfem/config/user.mk
+ADD --chown=euler:euler developer/user.mk mfem/config/user.mk
 # Run config/make s.t. first use is a bit quicker
 RUN cd mfem && make config && make -j && cd examples && make ex1 && make ex1p
 
@@ -52,12 +52,12 @@ RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.g
 RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git
 
 # Patching glvis-browser-server for correct host 
-ADD --chown=euler:euler glvis-patch-0001.patch ./glvis-js
+ADD --chown=euler:euler developer/glvis-patch-0001.patch ./glvis-js
 RUN cd glvis-js && \
     patch -u -b glvis-browser-server -i glvis-patch-0001.patch
 
 USER root
-ADD supervisord.conf /etc/supervisord.conf
+ADD developer/supervisord.conf /etc/supervisord.conf
 RUN touch /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log && \
     chown -R euler:euler /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log
 
