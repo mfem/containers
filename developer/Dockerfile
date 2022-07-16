@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
-
-# docker build -t mfem-developer .
+ARG njobs
+ENV njobs=${njobs}
+# docker build --buildarg njobs=2 -t mfem-developer .
 
 RUN apt-get update && apt-get install -y \
     supervisor curl git git-lfs clang clang-tools cmake autoconf \
@@ -22,12 +23,12 @@ RUN useradd --create-home --shell /bin/bash euler
 RUN curl -L https://github.com/hypre-space/hypre/archive/refs/tags/v2.19.0.tar.gz > /opt/archives/hypre-v2.19.0.tar.gz
 RUN tar xzf hypre-v2.19.0.tar.gz && cd hypre-2.19.0/src && \
     ./configure --prefix /usr/local --enable-shared --disable-static && \
-    make -j && make install
+    make -j ${njobs} && make install
 
 # metis
 RUN curl -L https://github.com/mfem/tpls/blob/gh-pages/metis-5.1.0.tar.gz?raw=true > /opt/archives/metis-5.1.0.tgz
 RUN tar xzf metis-5.1.0.tgz && cd metis-5.1.0 && \
-    make config shared=1 cc=mpicc prefix=/usr/local && make -j && make install
+    make config shared=1 cc=mpicc prefix=/usr/local && make -j ${njobs} && make install
 
 # OpenVSCode server
 RUN curl -L https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v1.69.1/openvscode-server-v1.69.1-linux-x64.tar.gz > \
@@ -41,7 +42,7 @@ WORKDIR /home/euler
 RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
 ADD --chown=euler:euler developer/user.mk mfem/config/user.mk
 # Run config/make s.t. first use is a bit quicker
-RUN cd mfem && make config && make -j && cd examples && make ex1 && make ex1p
+RUN cd mfem && make config && make -j ${njobs} && cd examples && make ex1 && make ex1p
 
 RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.gz > ./websockets-10.3.tar.gz && \
     tar xzf websockets-10.3.tar.gz && \
