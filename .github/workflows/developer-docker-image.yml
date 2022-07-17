@@ -2,9 +2,9 @@ name: Build developer image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
 
@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file developer/Dockerfile --tag developer:$(date +%s)
+      run: docker build --build-arg njobs=2 --file developer/Dockerfile --tag developer:$(date +%s) .
