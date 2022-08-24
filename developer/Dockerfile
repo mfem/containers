@@ -1,12 +1,13 @@
 FROM ubuntu:22.04
 ARG njobs
 ENV njobs=${njobs}
-# docker build --buildarg njobs=2 -t mfem-developer .
+# docker build --build-arg njobs=2 -t mfem-developer .
 
 RUN apt-get update && apt-get install -y \
-    supervisor curl git git-lfs clang clang-tools cmake autoconf \
+    supervisor curl git git-lfs clang clang-tools clangd cmake autoconf \
     automake gdb git libffi-dev zlib1g-dev python3-pip \
-    libssl-dev xz-utils pkgconf gfortran openmpi-bin libopenmpi-dev
+    libssl-dev xz-utils pkgconf gfortran openmpi-bin libopenmpi-dev \
+    wget libarchive-tools htop
 
 RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100 && \
     update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
@@ -38,11 +39,19 @@ RUN tar xzf openvscode-server-v1.69.1-linux-x64.tar.gz && chown -R euler:euler o
 USER euler
 WORKDIR /home/euler
 
+# Install OpenVSCode as user
+RUN mkdir -p ${HOME}/.openvscode-server/extensions
+RUN cd  ${HOME}/.openvscode-server/extensions && \
+    curl -L https://openvsxorg.blob.core.windows.net/resources/llvm-vs-code-extensions/vscode-clangd/0.1.21/llvm-vs-code-extensions.vscode-clangd-0.1.21.vsix > clangd.vsix && \
+    bsdtar -xvf clangd.vsix extension && \
+    mv extension llvm-vs-code-extensions.vscode-clangd-0.1.21
+
 # MFEM repo checkout
 RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
 ADD --chown=euler:euler developer/user.mk mfem/config/user.mk
 # Run config/make s.t. first use is a bit quicker
 RUN cd mfem && make config && make -j ${njobs} && cd examples && make ex1 && make ex1p
+ADD --chown=euler:euler developer/clangd_compile_flags.txt ./mfem/compile_flags.txt
 
 RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.gz > ./websockets-10.3.tar.gz && \
     tar xzf websockets-10.3.tar.gz && \
@@ -50,12 +59,9 @@ RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.g
     pip install --user .
 
 # GLVis JS
-RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git
-
-# Patching glvis-browser-server for correct host 
-ADD --chown=euler:euler developer/glvis-patch-0001.patch ./glvis-js
-RUN cd glvis-js && \
-    patch -u -b glvis-browser-server -i glvis-patch-0001.patch
+RUN git lfs install && git clone --depth=1 --branch web-parallel-streams https://github.com/GLVis/glvis-js.git
+ADD --chown=euler:euler developer/glvis-js/glvis.js ./glvis-js/src/glvis.js
+ADD --chown=euler:euler developer/glvis-js/versions.js ./glvis-js/src/versions.js
 
 USER root
 ADD developer/supervisord.conf /etc/supervisord.conf
