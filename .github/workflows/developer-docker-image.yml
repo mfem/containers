@@ -20,7 +20,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    
+
     - name: Log into registry ${{ env.REGISTRY }}
       if: github.event_name != 'pull_request'
       uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -31,6 +31,6 @@ jobs:
 
     - name: build docker image
       run: docker build --build-arg njobs=2 --file developer/Dockerfile --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
-      
+
     - name: push docker image
       run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
