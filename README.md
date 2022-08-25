@@ -7,8 +7,8 @@ clusters, and the cloud.
 
 - You can find pre-built images in the right sidebar under `Packages`.
 
-- Instructions how to use these containers locally can be found in this
-[page](mfem.org/tutorial/docker) of the MFEM website.
+- Instructions how to use these containers locally can be found in the
+[Docker page](https://mfem.org/tutorial/docker) of the MFEM website.
 
 - You can also use them to setup your own cloud MFEM development environment.
 See this [AWS script](developer/user-data.sh).
