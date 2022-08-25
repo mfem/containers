@@ -13,7 +13,7 @@ clusters, and the cloud.
 - You can also use them to setup your own cloud MFEM development environment.
 See this [AWS script](developer/user-data.sh).
 
-#### ⚙️`mfem/developer` image
+#### ⚙️ `mfem/developer` image
 
 This Docker image is used to provide a containerized environment for development
 of MFEM.
