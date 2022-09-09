@@ -59,7 +59,7 @@ RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.g
     pip install --user .
 
 # GLVis JS
-RUN git lfs install && git clone --depth=1 --branch containers https://github.com/GLVis/glvis-js.git
+RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git
 
 USER root
 ADD developer/supervisord.conf /etc/supervisord.conf
