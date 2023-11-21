@@ -32,17 +32,11 @@ jobs:
     - name: build base image
       run: docker-compose build base
 
-    - name: tag base image
-      run: docker tag mfem-base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
-
     - name: push base image
       run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
     - name: build cpu image
       run: docker-compose build cpu
-
-    - name: tag cpu image
-      run: docker tag mfem-cpu ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
     - name: push cpu image
       run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
