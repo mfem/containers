@@ -9,7 +9,7 @@ on:
 env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME_BASE: ${{ github.repository }}
+  IMAGE_NAME_PREFIX: ${{ github.repository }}
 
 jobs:
 
@@ -30,13 +30,19 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: build base image
-      run: docker-compose build base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}/base:latest .
+      run: docker-compose build base
+
+    - name: tag base image
+      run: docker tag mfem-base ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
     - name: push base image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}/base:latest
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
     - name: build cpu image
-      run: docker-compose build cpu ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}/cpu:latest .
+      run: docker-compose build cpu ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest .
+
+    - name: tag cpu image
+      run: docker tag mfem-cpu ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
     - name: push cpu image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BASE }}/cpu:latest
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
