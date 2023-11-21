@@ -41,8 +41,8 @@ jobs:
     - name: push cpu image
       run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
-    - name: build gpu image
-      run: docker-compose build gpu
+    - name: build cuda image
+      run: docker-compose build cuda
 
-    - name: push gpu image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/gpu:latest
+    - name: push cuda image
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest
