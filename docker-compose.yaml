@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  base:
+    build:
+      context: base
+      args:
+        num_jobs: 2
+    image: mfem/containers/base
+
+  cpu:
+    build:
+      context: cpu
+      args:
+        num_jobs: 2
+        hypre_version: 2.27.0
+    image: mfem/containers/cpu
+
+  cuda:
+    build:
+      context: cuda
+      args:
+        num_jobs: 2
+        cuda_arch_sm: 70
+        hypre_version: 2.27.0
+    image: mfem/containers/cuda
