@@ -6,7 +6,7 @@ services:
       context: base
       args:
         num_jobs: 2
-    image: mfem-base
+    image: ghcr.io/mfem/containers/base:latest
 
   cpu:
     build:
@@ -14,7 +14,7 @@ services:
       args:
         num_jobs: 2
         hypre_version: 2.27.0
-    image: mfem-cpu
+    image: ghcr.io/mfem/containers/cpu:latest
 
   cuda:
     build:
@@ -23,4 +23,4 @@ services:
         num_jobs: 2
         cuda_arch_sm: 70
         hypre_version: 2.27.0
-    image: mfem-cuda
+    image: ghcr.io/mfem/containers/cuda:latest

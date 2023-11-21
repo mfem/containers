@@ -1,4 +1,4 @@
-FROM mfem/containers/base
+FROM ghcr.io/mfem/containers/base:latest
 
 ARG num_jobs
 ARG cuda_arch_sm
