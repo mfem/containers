@@ -12,15 +12,51 @@ services:
     build:
       context: cpu
       args:
-        num_jobs: 2
+        num_jobs: 8
         hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/cpu:latest
+
+  cpu-tpls:
+    build:
+      context: cpu-tpls
+      args:
+        num_jobs: 8
+        hypre_version: 2.27.0
+    image: ghcr.io/mfem/containers/cpu-tpls:latest
 
   cuda:
     build:
       context: cuda
       args:
-        num_jobs: 2
+        num_jobs: 8
         cuda_arch_sm: 70
         hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/cuda:latest
+
+  cuda-tpls:
+    build:
+      context: cuda-tpls
+      args:
+        num_jobs: 8
+        cuda_arch_sm: 70
+        hypre_version: 2.27.0
+    image: ghcr.io/mfem/containers/cuda-tpls:latest
+
+  developer-cpu:
+    build:
+      context: developer
+      args:
+        base_image: cpu-tpls
+        num_jobs: 8
+        hypre_version: 2.27.0
+    image: ghcr.io/mfem/containers/developer-cpu:latest
+
+  developer-cuda:
+    build:
+      context: developer
+      args:
+        base_image: cuda-tpls
+        num_jobs: 8
+        cuda_arch_sm: 70
+        hypre_version: 2.27.0
+    image: ghcr.io/mfem/containers/developer-cuda:latest

@@ -20,4 +20,4 @@ WORKDIR /home/euler
 RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
 COPY --chown=euler:euler user.mk mfem/config/user.mk
 # Run config/make s.t. first use is a bit quicker
-# RUN cd mfem && make config && make -j ${num_jobs} && cd examples && make ex1 && make ex1p
+RUN cd mfem && make config && make -j ${num_jobs} && cd examples && make ex1 && make ex1p

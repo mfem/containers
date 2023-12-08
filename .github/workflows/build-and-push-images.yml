@@ -41,8 +41,16 @@ jobs:
     - name: push cpu image
       run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
-    - name: build cuda image
-      run: docker-compose build cuda
+    - name: build cpu-tpls image
+      run: docker-compose build cpu-tpls
 
-    - name: push cuda image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest
+    - name: push cpu-tpls image
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+
+    - name: build cuda-sm_70 image
+      run: docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls && \
+           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
+           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls_sm70:latest
+
+    - name: push cuda-sm_70 image
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls_sm70:latest

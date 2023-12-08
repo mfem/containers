@@ -46,7 +46,7 @@ SHARED = YES
 # If you set MFEM_USE_ENZYME=YES, CUDA_CXX has to be configured to use cuda with
 # clang as its host compiler.
 CUDA_CXX = nvcc
-CUDA_ARCH = sm_60
+CUDA_ARCH = CUDA_ARCH_SM_PLACEHOLDER
 CUDA_FLAGS = -x=cu --expt-extended-lambda -arch=$(CUDA_ARCH)
 # Prefixes for passing flags to the host compiler and linker when using CUDA_CXX
 CUDA_XCOMPILER = -Xcompiler=
@@ -120,7 +120,7 @@ MFEM_MPI_NP = 4
 MFEM_USE_MPI           = YES
 MFEM_USE_METIS         = $(MFEM_USE_MPI)
 MFEM_USE_METIS_5       = YES
-MFEM_DEBUG             = YES
+MFEM_DEBUG             = NO
 MFEM_USE_EXCEPTIONS    = NO
 MFEM_USE_ZLIB          = NO
 MFEM_USE_LIBUNWIND     = NO
@@ -133,12 +133,12 @@ MFEM_TIMER_TYPE        = $(if $(NOTMAC),2,4)
 MFEM_USE_SUNDIALS      = NO
 MFEM_USE_MESQUITE      = NO
 MFEM_USE_SUITESPARSE   = NO
-MFEM_USE_SUPERLU       = YES
+MFEM_USE_SUPERLU       = NO
 MFEM_USE_SUPERLU5      = NO
 MFEM_USE_MUMPS         = NO
 MFEM_USE_STRUMPACK     = NO
 MFEM_USE_GINKGO        = NO
-MFEM_USE_AMGX          = NO
+MFEM_USE_AMGX          = YES
 MFEM_USE_GNUTLS        = NO
 MFEM_USE_NETCDF        = NO
 MFEM_USE_PETSC         = NO
@@ -150,7 +150,7 @@ MFEM_USE_CONDUIT       = NO
 MFEM_USE_PUMI          = NO
 MFEM_USE_HIOP          = NO
 MFEM_USE_GSLIB         = NO
-MFEM_USE_CUDA          = NO
+MFEM_USE_CUDA          = YES
 MFEM_USE_HIP           = NO
 MFEM_USE_RAJA          = NO
 MFEM_USE_OCCA          = NO
@@ -218,22 +218,22 @@ endif
 # METIS library configuration
 ifeq ($(MFEM_USE_SUPERLU)$(MFEM_USE_STRUMPACK)$(MFEM_USE_MUMPS),NONONO)
    ifeq ($(MFEM_USE_METIS_5),NO)
-     METIS_DIR = 
+     METIS_DIR = /usr/local
      METIS_OPT =
-     METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis
+     METIS_LIB = -L$(METIS_DIR) -lmetis
    else
-     METIS_DIR = 
-     METIS_OPT =
-     METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis
+     METIS_DIR = /usr/local
+     METIS_OPT = -I$(METIS_DIR)/include
+     METIS_LIB = -L$(METIS_DIR)/lib -lmetis
    endif
 else
    # ParMETIS: currently needed by SuperLU or STRUMPACK. We assume that METIS 5
    # (included with ParMETIS) is installed in the same location.
    # Starting with STRUMPACK v2.2.0, ParMETIS is an optional dependency while
    # METIS is still required.
-   METIS_DIR = 
-   METIS_OPT =
-   METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis -lparmetis
+   METIS_DIR = @MFEM_DIR@/../parmetis-4.0.3
+   METIS_OPT = -I$(METIS_DIR)/include
+   METIS_LIB = -L$(METIS_DIR)/lib -lparmetis -lmetis
    MFEM_USE_METIS_5 = YES
 endif
 
@@ -286,9 +286,9 @@ ifeq ($(MFEM_USE_SUPERLU5),YES)
    SUPERLU_LIB = $(XLINKER)-rpath,$(SUPERLU_DIR)/lib -L$(SUPERLU_DIR)/lib\
       -lsuperlu_dist_5.1.0
 else
-   SUPERLU_DIR = /usr/local
-   SUPERLU_OPT = 
-   SUPERLU_LIB = $(XLINKER)-rpath,$(SUPERLU_DIR)/lib -L$(SUPERLU_DIR)/lib\
+   SUPERLU_DIR = @MFEM_DIR@/../SuperLU_DIST_6.3.1
+   SUPERLU_OPT = -I$(SUPERLU_DIR)/include
+   SUPERLU_LIB = $(XLINKER)-rpath,$(SUPERLU_DIR)/lib64 -L$(SUPERLU_DIR)/lib64\
       -lsuperlu_dist -lblas
 endif
 
@@ -347,9 +347,9 @@ endif
 GINKGO_LIB = $(XLINKER)-rpath,$(GINKGO_LIB_DIR) -L$(GINKGO_LIB_DIR) $(GINKGO_LINK)
 
 # AmgX library configuration
-AMGX_DIR = @MFEM_DIR@/../amgx
-AMGX_OPT = -I$(AMGX_DIR)/include
-AMGX_LIB = -lcusparse -lcusolver -lcublas -lnvToolsExt -L$(AMGX_DIR)/lib -lamgx
+AMGX_DIR = 
+AMGX_OPT = 
+AMGX_LIB = -lcusparse -lcusolver -lcublas -lnvToolsExt -lamgx
 
 # GnuTLS library configuration
 GNUTLS_OPT =

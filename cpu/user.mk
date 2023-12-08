@@ -218,22 +218,22 @@ endif
 # METIS library configuration
 ifeq ($(MFEM_USE_SUPERLU)$(MFEM_USE_STRUMPACK)$(MFEM_USE_MUMPS),NONONO)
    ifeq ($(MFEM_USE_METIS_5),NO)
-     METIS_DIR = /usr/local
+     METIS_DIR = 
      METIS_OPT =
-     METIS_LIB = -L$(METIS_DIR) -lmetis
+     METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis
    else
-     METIS_DIR = /usr/local
-     METIS_OPT = -I$(METIS_DIR)/include
-     METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+     METIS_DIR = 
+     METIS_OPT =
+     METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis
    endif
 else
    # ParMETIS: currently needed by SuperLU or STRUMPACK. We assume that METIS 5
    # (included with ParMETIS) is installed in the same location.
    # Starting with STRUMPACK v2.2.0, ParMETIS is an optional dependency while
    # METIS is still required.
-   METIS_DIR = @MFEM_DIR@/../parmetis-4.0.3
-   METIS_OPT = -I$(METIS_DIR)/include
-   METIS_LIB = -L$(METIS_DIR)/lib -lparmetis -lmetis
+   METIS_DIR = 
+   METIS_OPT =
+   METIS_LIB = -L/usr/lib/x86_64-linux-gnu -lmetis -lparmetis
    MFEM_USE_METIS_5 = YES
 endif
 

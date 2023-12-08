@@ -46,7 +46,7 @@ SHARED = YES
 # If you set MFEM_USE_ENZYME=YES, CUDA_CXX has to be configured to use cuda with
 # clang as its host compiler.
 CUDA_CXX = nvcc
-CUDA_ARCH = sm_60
+CUDA_ARCH = CUDA_ARCH_SM_PLACEHOLDER
 CUDA_FLAGS = -x=cu --expt-extended-lambda -arch=$(CUDA_ARCH)
 # Prefixes for passing flags to the host compiler and linker when using CUDA_CXX
 CUDA_XCOMPILER = -Xcompiler=

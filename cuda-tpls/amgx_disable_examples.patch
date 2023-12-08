@@ -1,0 +1,32 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7bc0f1b..b6576fc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -314,5 +314,5 @@ install(TARGETS amgxsh DESTINATION "lib")
+ #export(TARGETS amgxsh FILE ${CMAKE_CURRENT_SOURCE_DIR}/amgxsh.cmake)
+ 
+ # build examples
+-add_subdirectory(examples)
++# add_subdirectory(examples)
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index b7fbef7..5d2b0f5 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -72,6 +72,10 @@ install(FILES
+ 
+ set(AMGX_INCLUDES ../include)
+ 
++
++option(ENABLE_TESTS "Enable tests" OFF)
++if(ENABLE_TESTS)
++
+ set(tests_all ${tests_all} testframework.cu test_utils.cu unit_test.cu)
+ 
+ add_library(amgx_tests_libs OBJECT ${tests_all})
+@@ -118,4 +122,4 @@ endif(MPI_FOUND)
+ if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
+   install(TARGETS amgx_tests_launcher DESTINATION "lib/tests")
+ endif(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
+-
++endif()
