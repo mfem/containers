@@ -2,7 +2,6 @@ FROM ghcr.io/mfem/containers/cuda:latest
 
 ARG num_jobs
 ARG cuda_arch_sm
-ARG hypre_version
 
 USER root
 
