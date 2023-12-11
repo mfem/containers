@@ -49,9 +49,9 @@ jobs:
 
     - name: build cuda-sm70 image
       run: |
-        docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls
-        docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
-           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+        docker-compose build --build-arg cuda_arch_sm=70 cuda
+        docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
+           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
 
     - name: push cuda-sm70 image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
