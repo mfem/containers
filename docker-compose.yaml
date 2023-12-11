@@ -21,7 +21,6 @@ services:
       context: cpu-tpls
       args:
         num_jobs: 8
-        hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/cpu-tpls:latest
 
   cuda:
@@ -39,7 +38,6 @@ services:
       args:
         num_jobs: 8
         cuda_arch_sm: 70
-        hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/cuda-tpls:latest
 
   developer-cpu:
@@ -48,7 +46,6 @@ services:
       args:
         base_image: cpu-tpls
         num_jobs: 8
-        hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/developer-cpu:latest
 
   developer-cuda:
@@ -58,5 +55,4 @@ services:
         base_image: cuda-tpls
         num_jobs: 8
         cuda_arch_sm: 70
-        hypre_version: 2.27.0
     image: ghcr.io/mfem/containers/developer-cuda:latest
