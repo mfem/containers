@@ -1,7 +1,6 @@
 FROM ghcr.io/mfem/containers/cpu:latest
 
 ARG num_jobs
-ARG hypre_version
 
 USER root
 
@@ -20,6 +19,23 @@ RUN tar xzf superlu-v8.2.1.tar.gz && cd superlu_dist-8.2.1 && \
     -DTPL_PARMETIS_INCLUDE_DIRS="/usr/include" \
     -DTPL_PARMETIS_LIBRARIES="/usr/lib/libparmetis.so" && \
     make -j ${num_jobs} && make install
+
+RUN git clone -b release --single-branch https://gitlab.com/petsc/petsc.git petsc && cd petsc && git checkout v3.20.2
+RUN cd petsc && \
+    ./configure --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 \
+    --with-debugging=0 \
+    --with-fortran-bindings=0 \
+    --with-sowing=0 \
+    --with-blaslapack-dir="/usr/lib/x86_64-linux-gnu" \
+    --with-metis-lib="/usr/lib/x86_64-linux-gnu/libmetis.so" \
+    --with-metis-include="/usr/include" \
+    --with-parmetis-lib="/usr/lib/libparmetis.so" \
+    --with-parmetis-include="/usr/include" \
+    --with-hypre-dir="/usr/local" \
+    --with-superlu_dist-dir="/usr/local" \
+    --prefix="/usr/local" && \
+    make PETSC_DIR=/opt/archives/petsc PETSC_ARCH=arch-linux-c-opt all && \
+    make PETSC_DIR=/opt/archives/petsc PETSC_ARCH=arch-linux-c-opt install
 
 USER euler
 WORKDIR /home/euler

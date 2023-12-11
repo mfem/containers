@@ -141,7 +141,7 @@ MFEM_USE_GINKGO        = NO
 MFEM_USE_AMGX          = NO
 MFEM_USE_GNUTLS        = NO
 MFEM_USE_NETCDF        = NO
-MFEM_USE_PETSC         = NO
+MFEM_USE_PETSC         = YES
 MFEM_USE_SLEPC         = NO
 MFEM_USE_MPFR          = NO
 MFEM_USE_SIDRE         = NO
@@ -364,8 +364,8 @@ NETCDF_LIB = $(XLINKER)-rpath,$(NETCDF_DIR)/lib -L$(NETCDF_DIR)/lib\
  -lnetcdf -lhdf5_hl -lhdf5 $(ZLIB_LIB)
 
 # PETSc library configuration (version greater or equal to 3.8 or the dev branch)
-PETSC_ARCH := arch-linux2-c-debug
-PETSC_DIR  := $(MFEM_DIR)/../petsc/$(PETSC_ARCH)
+PETSC_ARCH := 
+PETSC_DIR  := /usr/local
 PETSC_VARS := $(PETSC_DIR)/lib/petsc/conf/petscvariables
 PETSC_FOUND := $(if $(wildcard $(PETSC_VARS)),YES,)
 PETSC_INC_VAR = PETSC_CC_INCLUDES
