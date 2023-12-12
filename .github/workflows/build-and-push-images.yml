@@ -34,7 +34,7 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
   build-cpu:
-    name: build cpu image
+    name: build cpu images
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +75,7 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
 
   build-cuda-sm70:
-    name: build cuda-sm70 image
+    name: build cuda-sm70 images
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
