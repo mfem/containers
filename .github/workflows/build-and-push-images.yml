@@ -62,21 +62,66 @@ jobs:
       - name: push cpu image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
+  build-cpu-tpls:
+    name: build cpu-tpls image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build cpu image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
 
-      # - name: build cpu-tpls image
-      #   run: docker-compose build cpu-tpls
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # - name: push cpu-tpls image
-      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: build developer-cpu image
-      #   run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
+      - name: build cpu-tpls image
+        run: docker-compose build cpu-tpls
 
-      # - name: push developer-cpu image
-      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
+      - name: push cpu-tpls image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+
+  build-developer-cpu-tpls:
+    name: build developer-cpu image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build cpu-tpls image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build developer-cpu image
+        run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
+
+      - name: push developer-cpu image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
 
   build-cuda-sm70:
-    name: build cpu image
+    name: build cuda-sm70 image
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -107,17 +152,63 @@ jobs:
       - name: push cuda-sm70 image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
 
-      # - name: build cuda-tpls-sm70 image
-      #   run: |
-      #     docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls
-      #     docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
-      #       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+  build-cuda-tpls-sm70:
+    name: build cuda-tpls-sm70 image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build cuda-sm70 image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
 
-      # - name: push cuda-tpls-sm70 image
-      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # - name: build developer-cuda-sm70 image
-      #   run: docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda-sm70
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: push developer-cuda-sm70 image
-      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
+      - name: build cuda-tpls-sm70 image
+        run: |
+          docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls
+          docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+
+      - name: push cuda-tpls-sm70 image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+
+  build-developer-cuda-sm70:
+    name: build developer-cuda-sm70 image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build cuda-tpls-sm70 image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build developer-cuda-sm70 image
+        run: docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda-sm70
+
+      - name: push developer-cuda-sm70 image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
