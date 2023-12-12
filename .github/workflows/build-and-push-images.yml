@@ -43,6 +43,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           check-name: 'build base image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 
       - name: Checkout repository
@@ -84,6 +85,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           check-name: 'build base image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
 
       - name: Checkout repository
