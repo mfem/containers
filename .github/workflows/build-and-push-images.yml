@@ -12,67 +12,110 @@ env:
   IMAGE_NAME_PREFIX: ${{ github.repository }}
 
 jobs:
-
-  build:
-
+  build-base:
+    name: build base image
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Log into registry ${{ env.REGISTRY }}
-      if: github.event_name != 'pull_request'
-      uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: build base image
-      run: docker-compose build base
+      - name: build base image
+        run: docker-compose build base
 
-    - name: push base image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
+      - name: push base image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
-    - name: build cpu image
-      run: docker-compose build cpu
+  build-cpu:
+    name: build cpu image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build base image'
+          wait-interval: 10
 
-    - name: push cpu image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: build cpu-tpls image
-      run: docker-compose build cpu-tpls
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: push cpu-tpls image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+      - name: build cpu image
+        run: docker-compose build cpu
 
-    - name: build developer-cpu image
-      run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
+      - name: push cpu image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
-    - name: push developer-cpu image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
 
-    - name: build cuda-sm70 image
-      run: |
-        docker-compose build --build-arg cuda_arch_sm=70 cuda
-        docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
-           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
+      # - name: build cpu-tpls image
+      #   run: docker-compose build cpu-tpls
 
-    - name: push cuda-sm70 image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
+      # - name: push cpu-tpls image
+      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
 
-    - name: build cuda-tpls-sm70 image
-      run: |
-        docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls
-        docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
-           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+      # - name: build developer-cpu image
+      #   run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
 
-    - name: push cuda-tpls-sm70 image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+      # - name: push developer-cpu image
+      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
 
-    - name: build developer-cuda-sm70 image
-      run: docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda-sm70
+  build-cuda-sm70:
+    name: build cpu image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: wait for base image
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'build base image'
+          wait-interval: 10
 
-    - name: push developer-cuda-sm70 image
-      run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build cuda-sm70 image
+        run: |
+          docker-compose build --build-arg cuda_arch_sm=70 cuda
+          docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
+
+      - name: push cuda-sm70 image
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm70:latest
+
+      # - name: build cuda-tpls-sm70 image
+      #   run: |
+      #     docker-compose build --build-arg cuda_arch_sm=70 cuda-tpls
+      #     docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls:latest \
+      #       ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+
+      # - name: push cuda-tpls-sm70 image
+      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
+
+      # - name: build developer-cuda-sm70 image
+      #   run: docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda-sm70
+
+      # - name: push developer-cuda-sm70 image
+      #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
