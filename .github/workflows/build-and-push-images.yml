@@ -116,7 +116,10 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-tpls-sm70:latest
 
       - name: build developer-cuda-sm70 image
-        run: docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda
+        run: |
+          docker-compose build --build-arg base_image=cuda-tpls-sm70 developer-cuda
+          docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
 
       - name: push developer-cuda-sm70 image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm70:latest
