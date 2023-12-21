@@ -58,7 +58,7 @@ docker-compose build --build-arg cuda_arch_sm=80 cuda && docker image tag cuda:l
 docker-compose build --build-arg cuda_arch_sm=80 cuda-tpls && docker image tag cuda-tpls:latest cuda-tpls-sm80:latest
 ```
 
-We recommond starting the container with:
+We recommend starting the container with:
 ```
 docker run --cap-add=SYS_PTRACE -ti --gpus all ghcr.io/mfem/containers/cuda-tpls-sm70:latest /bin/bash
 ```
