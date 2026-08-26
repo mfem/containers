@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build base image
-        run: docker-compose build base
+        run: docker compose build base
 
       - name: push base image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
@@ -57,19 +57,19 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build cpu image
-        run: docker-compose build cpu
+        run: docker compose build cpu
 
       - name: push cpu image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
 
       - name: build cpu-tpls image
-        run: docker-compose build cpu-tpls
+        run: docker compose build cpu-tpls
 
       - name: push cpu-tpls image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
 
       - name: build developer-cpu image
-        run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
+        run: docker compose build --build-arg base_image=cpu-tpls developer-cpu
 
       - name: push developer-cpu image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
@@ -99,7 +99,7 @@ jobs:
 
       - name: build cuda-sm89 image
         run: |
-          docker-compose build --build-arg cuda_arch_sm=89 cuda
+          docker compose build --build-arg cuda_arch_sm=89 cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:latest
 
@@ -108,7 +108,7 @@ jobs:
 
       - name: build developer-cuda-sm89 image
         run: |
-          docker-compose build developer-cuda
+          docker compose build developer-cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda:latest \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
 
