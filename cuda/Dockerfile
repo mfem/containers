@@ -3,6 +3,7 @@ FROM ghcr.io/mfem/containers/base:latest
 ARG num_jobs
 ARG cuda_arch_sm
 ARG hypre_version
+ARG mfem_ref=master
 
 USER root
 
@@ -25,7 +26,7 @@ WORKDIR /home/euler
 
 ENV PATH=$PATH:/usr/local/cuda/bin
 
-RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
+RUN git clone --depth=1 --branch ${mfem_ref} https://github.com/mfem/mfem.git mfem
 COPY --chown=euler:euler user.mk mfem/config/user.mk
 RUN sed -i 's/CUDA_ARCH_SM_PLACEHOLDER/sm_${cuda_arch_sm}/' mfem/config/user.mk
 RUN cd mfem && make config && make -j ${num_jobs} && cd examples && make ex1 && make ex1p
