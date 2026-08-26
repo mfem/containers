@@ -5,16 +5,48 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  schedule:
+    - cron: "17 4 * * 1" # weekly Monday at 04:17 UTC
+  workflow_dispatch:
+    inputs:
+      mfem_ref:
+        description: "MFEM git ref (branch or tag) to build"
+        required: true
+        default: "master"
+      image_tag:
+        description: "Image tag to publish (e.g. v4.9)"
+        required: true
+        default: "latest"
+
+permissions:
+  contents: read
+  packages: write
 
 env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME_PREFIX: ${{ github.repository }}
+  MFEM_REF: ${{ github.event.inputs.mfem_ref || 'master' }}
+  IMAGE_TAG: ${{ github.event.inputs.image_tag || 'latest' }}
 
 jobs:
+  validate-inputs:
+    name: validate workflow inputs
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: validate image tag
+        if: inputs.mfem_ref != 'master' && inputs.image_tag == 'latest'
+        run: |
+          echo "A non-master MFEM ref cannot be published as latest." >&2
+          exit 1
+
   build-base:
     name: build base image
-    if: github.event_name != 'pull_request'
+    if: |
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,7 +68,10 @@ jobs:
   build-cpu:
     name: build cpu images
     needs: build-base
-    if: github.event_name != 'pull_request'
+    if: |
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -53,24 +88,36 @@ jobs:
         run: docker compose build cpu
 
       - name: push cpu image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:$IMAGE_TAG"
 
       - name: build cpu-tpls image
         run: docker compose build cpu-tpls
 
       - name: push cpu-tpls image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:$IMAGE_TAG"
 
       - name: build developer-cpu image
         run: docker compose build --build-arg base_image=cpu-tpls developer-cpu
 
       - name: push developer-cpu image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
 
   build-cuda-sm89:
     name: build cuda-sm89 images
     needs: build-base
-    if: github.event_name != 'pull_request'
+    if: |
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -87,16 +134,16 @@ jobs:
         run: |
           docker compose build --build-arg cuda_arch_sm=89 cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:latest
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:$IMAGE_TAG"
 
       - name: push cuda-sm89 image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:latest
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:$IMAGE_TAG"
 
       - name: build developer-cuda-sm89 image
         run: |
           docker compose build developer-cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:$IMAGE_TAG"
 
       - name: push developer-cuda-sm89 image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:$IMAGE_TAG"
