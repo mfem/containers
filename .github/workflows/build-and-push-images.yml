@@ -108,7 +108,7 @@ jobs:
 
       - name: build developer-cuda-sm89 image
         run: |
-          docker-compose build --build-arg base_image=cuda-sm89 developer-cuda
+          docker-compose build developer-cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda:latest \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
 
