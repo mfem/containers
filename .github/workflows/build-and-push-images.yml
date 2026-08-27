@@ -20,7 +20,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
   REGISTRY: ghcr.io
@@ -30,23 +29,34 @@ env:
   IMAGE_TAG: ${{ github.event.inputs.image_tag || 'latest' }}
 
 jobs:
-  validate-inputs:
-    name: validate workflow inputs
-    if: github.event_name == 'workflow_dispatch'
+  build-images:
+    name: build images
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: validate image tag
-        if: inputs.mfem_ref != 'master' && inputs.image_tag == 'latest'
-        run: |
-          echo "A non-master MFEM ref cannot be published as latest." >&2
-          exit 1
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-  build-base:
-    name: build base image
-    if: |
-      github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_dispatch' ||
-       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
+      - name: build base image
+        run: docker compose build base
+
+      - name: build cpu images
+        run: |
+          docker compose build cpu
+          docker compose build cpu-tpls
+          docker compose build --build-arg base_image=cpu-tpls developer-cpu
+
+      - name: build cuda-sm89 images
+        run: |
+          docker compose build --build-arg cuda_arch_sm=89 cuda
+          docker compose build developer-cuda
+
+  build-and-push-base:
+    name: build and push base image
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -65,13 +75,13 @@ jobs:
       - name: push base image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
-  build-cpu:
-    name: build cpu images
-    needs: build-base
-    if: |
-      github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_dispatch' ||
-       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
+  build-and-push-cpu:
+    name: build and push cpu images
+    needs: build-and-push-base
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -111,13 +121,13 @@ jobs:
             "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
           docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
 
-  build-cuda-sm89:
-    name: build cuda-sm89 images
-    needs: build-base
-    if: |
-      github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_dispatch' ||
-       inputs.mfem_ref == 'master' || inputs.image_tag != 'latest')
+  build-and-push-cuda-sm89:
+    name: build and push cuda-sm89 images
+    needs: build-and-push-base
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
