@@ -5,7 +5,7 @@ USER root
 
 WORKDIR /opt/archives
 
-RUN apt-get update && apt-get install -y supervisor python3-websockets
+RUN apt-get update && apt-get install -y supervisor python3-websockets nginx
 
 # OpenVSCode server
 RUN curl -L https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v1.69.1/openvscode-server-v1.69.1-linux-x64.tar.gz > \
@@ -24,12 +24,20 @@ RUN cd  ${HOME}/.openvscode-server/extensions && \
     bsdtar -xvf clangd.vsix extension && \
     mv extension llvm-vs-code-extensions.vscode-clangd-0.1.21
 
-# GLVis JS
-RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git
+# GLVis JS - clone from fork with HTTPS proxy support
+# TODO using tdrwenski fork just for testing, change back later
+RUN git lfs install && \
+    git clone --depth=1 --branch wss-mixed-content-fix \
+    https://github.com/tdrwenski/glvis-js.git
 
 USER root
 ADD supervisord.conf /etc/supervisord.conf
-RUN touch /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log && \
-    chown -R euler:euler /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log
+
+# Reverse proxy: expose VSCode, the GLVis viewer, and the GLVis websocket on
+# the single tutorial port (3000), routed by path.
+ADD nginx.conf /etc/nginx/nginx.conf
+
+RUN touch /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log /var/log/nginx.log && \
+    chown -R euler:euler /var/log/glvis-js-webserver.log /var/log/glvis-browser-server.log /var/log/openvscode-server.log /var/log/nginx.log
 
 CMD ["/usr/bin/supervisord"]
