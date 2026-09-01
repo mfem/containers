@@ -42,7 +42,7 @@ services:
     build:
       context: developer
       args:
-        base_image: cuda-tpls
+        base_image: cuda
         num_jobs: 8
         cuda_arch_sm: 89
     image: ghcr.io/mfem/containers/developer-cuda:latest

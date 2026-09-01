@@ -5,7 +5,7 @@ USER root
 
 WORKDIR /opt/archives
 
-RUN apt-get update && apt-get install -y supervisor
+RUN apt-get update && apt-get install -y supervisor python3-websockets
 
 # OpenVSCode server
 RUN curl -L https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v1.69.1/openvscode-server-v1.69.1-linux-x64.tar.gz > \
@@ -23,11 +23,6 @@ RUN cd  ${HOME}/.openvscode-server/extensions && \
     curl -L https://openvsxorg.blob.core.windows.net/resources/llvm-vs-code-extensions/vscode-clangd/0.1.21/llvm-vs-code-extensions.vscode-clangd-0.1.21.vsix > clangd.vsix && \
     bsdtar -xvf clangd.vsix extension && \
     mv extension llvm-vs-code-extensions.vscode-clangd-0.1.21
-
-RUN curl -L https://github.com/aaugustin/websockets/archive/refs/tags/10.3.tar.gz > ./websockets-10.3.tar.gz && \
-    tar xzf websockets-10.3.tar.gz && \
-    cd websockets-10.3 && \
-    pip install --user .
 
 # GLVis JS
 RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git

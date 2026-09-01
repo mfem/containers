@@ -31,18 +31,12 @@ Both types are available in the following configurations:
     - SuperLU_dist 8.2.1
     - PETSc 3.20.2
 
-- [`cuda-tpls-sm89`](https://github.com/mfem/containers/pkgs/container/containers%2Fcuda-tpls-sm89)
-    - CUDA toolkit 12.9
-    - OpenMPI 4.1.2
-    - hypre 2.31.0
-    - AmgX 8.2.1
-
 - [`developer-cpu`](https://github.com/mfem/containers/pkgs/container/containers%2Fdeveloper-cpu)
     - extension of `cpu-tpls` that includes a development environment with VSCode server and GLVis
     - see the MFEM [AWS tutorial](https://mfem.org/tutorial/docker) for details
 
 - [`developer-cuda-sm89`](https://github.com/mfem/containers/pkgs/container/containers%2Fdeveloper-cuda-sm89)
-    - extension of `cuda-tpls-sm89` that includes a development environment with VSCode server and GLVis
+    - extension of `cuda-sm89` that includes a development environment with VSCode server and GLVis
     - see the MFEM [AWS tutorial](https://mfem.org/tutorial/docker) for details
 
 Note that the `cuda` images require the host has the
@@ -55,12 +49,11 @@ CUDA `sm_89`. You can create your own image that support a different compute cap
 git clone git@github.com:mfem/containers.git
 cd containers
 docker-compose build --build-arg cuda_arch_sm=80 cuda && docker image tag cuda:latest cuda-sm80:latest
-docker-compose build --build-arg cuda_arch_sm=80 cuda-tpls && docker image tag cuda-tpls:latest cuda-tpls-sm80:latest
 ```
 
 We recommend starting the container with:
 ```
-docker run --rm --cap-add=SYS_PTRACE --runtime=nvidia --gpus all -ti ghcr.io/mfem/containers/cuda-tpls-sm89:latest bash
+docker run --rm --cap-add=SYS_PTRACE --runtime=nvidia --gpus all -ti ghcr.io/mfem/containers/cuda-sm89:latest bash
 ```
 which puts you in the home directory for the `euler` user, enables access to all GPUs, and lets you
 explore the broad selection of examples or write your own.
