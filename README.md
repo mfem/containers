@@ -44,11 +44,11 @@ Note that the `cuda` images require the host has the
 
 Note also that the `cuda` images have MFEM and its third-party libraries configured for
 CUDA `sm_89`. You can create your own image that support a different compute capability (e.g. sm_80) with
-`docker-compose` as follows:
+`docker compose` as follows:
 ```
 git clone git@github.com:mfem/containers.git
 cd containers
-docker-compose build --build-arg cuda_arch_sm=80 cuda && docker image tag cuda:latest cuda-sm80:latest
+docker compose build --build-arg cuda_arch_sm=80 cuda && docker image tag cuda:latest cuda-sm80:latest
 ```
 
 We recommend starting the container with:

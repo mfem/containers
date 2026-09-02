@@ -2,6 +2,7 @@ FROM ghcr.io/mfem/containers/base:latest
 
 ARG num_jobs
 ARG hypre_version
+ARG mfem_ref=master
 
 USER root
 
@@ -17,7 +18,7 @@ USER euler
 WORKDIR /home/euler
 
 # MFEM repo checkout
-RUN git clone --depth=1 https://github.com/mfem/mfem.git mfem
+RUN git clone --depth=1 --branch ${mfem_ref} https://github.com/mfem/mfem.git mfem
 COPY --chown=euler:euler user.mk mfem/config/user.mk
 # Run config/make s.t. first use is a bit quicker
 RUN cd mfem && make config && make -j ${num_jobs} && cd examples && make ex1 && make ex1p

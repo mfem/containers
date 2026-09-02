@@ -5,93 +5,136 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  schedule:
+    - cron: "17 4 * * 1" # weekly Monday at 04:17 UTC
+  workflow_dispatch:
+    inputs:
+      mfem_ref:
+        description: "MFEM git ref (branch or tag) to build"
+        required: true
+        default: "master"
+      image_tag:
+        description: "Image tag to publish (e.g. v4.9)"
+        required: true
+        default: "latest"
+
+permissions:
+  contents: read
 
 env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME_PREFIX: ${{ github.repository }}
+  MFEM_REF: ${{ github.event.inputs.mfem_ref || 'master' }}
+  IMAGE_TAG: ${{ github.event.inputs.image_tag || 'latest' }}
 
 jobs:
-  build-base:
-    name: build base image
-    if: github.event_name != 'pull_request'
+  build-images:
+    name: build images
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
+
+      - name: build base image
+        run: docker compose build base
+
+      - name: build cpu images
+        run: |
+          docker compose build cpu
+          docker compose build cpu-tpls
+          docker compose build --build-arg base_image=cpu-tpls developer-cpu
+
+      - name: build cuda-sm89 images
+        run: |
+          docker compose build --build-arg cuda_arch_sm=89 cuda
+          docker compose build developer-cuda
+
+  build-and-push-base:
+    name: build and push base image
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build base image
-        run: docker-compose build base
+        run: docker compose build base
 
       - name: push base image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/base:latest
 
-  build-cpu:
-    name: build cpu images
+  build-and-push-cpu:
+    name: build and push cpu images
+    needs: build-and-push-base
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
-      - name: wait for base image
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.ref }}
-          check-name: "build base image"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: build cpu image
-        run: docker-compose build cpu
+        run: docker compose build cpu
 
       - name: push cpu image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu:$IMAGE_TAG"
 
       - name: build cpu-tpls image
-        run: docker-compose build cpu-tpls
+        run: docker compose build cpu-tpls
 
       - name: push cpu-tpls image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cpu-tpls:$IMAGE_TAG"
 
       - name: build developer-cpu image
-        run: docker-compose build --build-arg base_image=cpu-tpls developer-cpu
+        run: docker compose build --build-arg base_image=cpu-tpls developer-cpu
 
       - name: push developer-cpu image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest
+        run: |
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:latest \
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
+          docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cpu:$IMAGE_TAG"
 
-  build-cuda-sm89:
-    name: build cuda-sm89 images
+  build-and-push-cuda-sm89:
+    name: build and push cuda-sm89 images
+    needs: build-and-push-base
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
-      - name: wait for base image
-        uses: lewagon/wait-on-check-action@v1.3.1
-        with:
-          ref: ${{ github.ref }}
-          check-name: "build base image"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -99,18 +142,18 @@ jobs:
 
       - name: build cuda-sm89 image
         run: |
-          docker-compose build --build-arg cuda_arch_sm=89 cuda
+          docker compose build --build-arg cuda_arch_sm=89 cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:latest
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:$IMAGE_TAG"
 
       - name: push cuda-sm89 image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:latest
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/cuda-sm89:$IMAGE_TAG"
 
       - name: build developer-cuda-sm89 image
         run: |
-          docker-compose build developer-cuda
+          docker compose build developer-cuda
           docker image tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
+            "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:$IMAGE_TAG"
 
       - name: push developer-cuda-sm89 image
-        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:latest
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/developer-cuda-sm89:$IMAGE_TAG"
