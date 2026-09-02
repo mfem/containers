@@ -25,6 +25,11 @@ Both types are available in the following configurations:
     - OpenMPI 4.1.2
     - hypre 2.31.0
 
+- [`cuda-sm75`](https://github.com/mfem/containers/pkgs/container/containers%2Fcuda-sm75)
+    - CUDA toolkit 12.9
+    - OpenMPI 4.1.2
+    - hypre 2.31.0
+
 - [`cpu-tpls`](https://github.com/mfem/containers/pkgs/container/containers%2Fcpu-tpls)
     - OpenMPI 4.1.2
     - hypre 2.31.0
@@ -37,6 +42,10 @@ Both types are available in the following configurations:
 
 - [`developer-cuda-sm89`](https://github.com/mfem/containers/pkgs/container/containers%2Fdeveloper-cuda-sm89)
     - extension of `cuda-sm89` that includes a development environment with VSCode server and GLVis
+    - see the MFEM [AWS tutorial](https://mfem.org/tutorial/docker) for details
+
+- [`developer-cuda-sm75`](https://github.com/mfem/containers/pkgs/container/containers%2Fdeveloper-cuda-sm75)
+    - extension of `cuda-sm75` that includes a development environment with VSCode server and GLVis
     - see the MFEM [AWS tutorial](https://mfem.org/tutorial/docker) for details
 
 Note that the `cuda` images require the host has the
