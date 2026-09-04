@@ -24,11 +24,8 @@ RUN cd  ${HOME}/.openvscode-server/extensions && \
     bsdtar -xvf clangd.vsix extension && \
     mv extension llvm-vs-code-extensions.vscode-clangd-0.1.21
 
-# GLVis JS - clone from fork with HTTPS proxy support
-# TODO using tdrwenski fork just for testing, change back later
-RUN git lfs install && \
-    git clone --depth=1 --branch wss-mixed-content-fix \
-    https://github.com/tdrwenski/glvis-js.git
+# GLVis JS
+RUN git lfs install && git clone --depth=1 https://github.com/GLVis/glvis-js.git
 
 USER root
 ADD supervisord.conf /etc/supervisord.conf
