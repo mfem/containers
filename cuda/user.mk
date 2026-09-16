@@ -3,7 +3,9 @@ VERBOSE = NO
 CXX = clang++
 MPICXX = OMPI_CXX=$(CXX) mpicxx
 
-BASE_FLAGS  = -std=c++17
+# clang's list of known CUDA releases lags the installed toolkit, so it warns
+# on every translation unit about a version difference that is benign.
+BASE_FLAGS  = -std=c++17 -Wno-unknown-cuda-version
 OPTIM_FLAGS = -O3 $(BASE_FLAGS)
 
 STATIC = NO
