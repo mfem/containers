@@ -23,7 +23,8 @@ WORKDIR /home/euler
 
 # Create compile_commands for clangd plugin. Options must match the features
 # the base image's MFEM was built with, or clangd greys out enabled code.
-# CUDA is compiled with clang since clangd cannot parse nvcc command lines.
+# CUDA is compiled with clang since clangd cannot parse nvcc command lines, and
+# clang's list of known CUDA releases lags the installed toolkit.
 # PETSc is a prefix install, so PETSC_ARCH must be empty.
 RUN cmake -S mfem -B mfem/build \
         -DMFEM_USE_MPI=YES \
@@ -37,6 +38,7 @@ RUN cmake -S mfem -B mfem/build \
         -DMFEM_USE_CUDA=${mfem_use_cuda} \
         -DCMAKE_CUDA_COMPILER=clang++ \
         -DCMAKE_CUDA_ARCHITECTURES=${cuda_arch_sm} \
+        -DCMAKE_CUDA_FLAGS=-Wno-unknown-cuda-version \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 # Install OpenVSCode as user
